@@ -1,0 +1,14 @@
+FROM fopina/fluent-bit-plugin-dev as builder
+
+ADD . /myplugin
+
+RUN cmake -DFLB_SOURCE=/usr/src/fluentbit/fluent-bit-1.4.2/ \
+          -DPLUGIN_NAME=filter_math ../
+
+RUN make
+
+RUN ls -la
+
+FROM scratch
+
+COPY --from=builder /myplugin/build/flb-filter_math.so /

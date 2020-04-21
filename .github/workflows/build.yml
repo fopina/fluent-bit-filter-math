@@ -13,15 +13,23 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      
+      - name: set up buildx
+        id: buildx
+        uses: crazy-max/ghaction-docker-buildx@v1
+        with:
+          version: latest
 
       - name: Build project
         run: |
-          mkdir -p build  # don't let docker create the dir otherwise it is owned by root...
-          docker run --rm \
-                     -v $(pwd):/myplugin fopina/fluent-bit-plugin-dev \
-                     sh -c "cmake -DFLB_SOURCE=/usr/src/fluentbit/fluent-bit-1.4.2/ \
-                        -DPLUGIN_NAME=filter_math ../ && make"
-          gzip build/flb-filter_math.so
+          mkdir -p build
+          docker buildx build \
+            --platform linux/amd64,linux/arm64,linux/arm/v7 \
+            -o build -f Dockerfile.build .
+          mv build/linux_amd64/flb-filter_math.so build/flb-filter_math_linux_amd64.so
+          mv build/linux_arm64/flb-filter_math.so build/flb-filter_math_linux_arm64.so
+          mv build/linux_arm_v7/flb-filter_math.so build/flb-filter_math_linux_arm_v7.so
+          gzip build/flb-filter_math*.so
 
       - name: Create Release
         id: create_release
@@ -36,12 +44,32 @@ jobs:
           allow_update: true
 
       - name: Upload Release Asset
-        id: upload-release-asset 
+        id: upload-release-asset-1
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/flb-filter_math.so.gz
+          asset_path: build/flb-filter_math_linux_amd64.so.gz
           asset_name: flb-filter_math_linux_amd64.so.gz
+          asset_content_type: application/gzip
+      - name: Upload Release Asset
+        id: upload-release-asset-2
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/flb-filter_math_linux_arm64.so.gz
+          asset_name: flb-filter_math_linux_arm64.so.gz
+          asset_content_type: application/gzip
+      - name: Upload Release Asset
+        id: upload-release-asset-3
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/flb-filter_math_linux_arm_v7.so.gz
+          asset_name: flb-filter_math_linux_arm_v7.so.gz
           asset_content_type: application/gzip
