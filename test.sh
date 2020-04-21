@@ -15,9 +15,13 @@ docker run --rm \
 
 docker run --rm \
            -v $(pwd)/build:/myplugin fluent/fluent-bit:1.4.2 \
-           /fluent-bit/bin/fluent-bit \
+           /fluent-bit/bin/fluent-bit -v \
            -f 1 \
            -e /myplugin/flb-filter_math.so \
            -i mem \
-           -F math -p 'Operation=nest' -p 'Wildcard=Mem.*' -p 'Nest_under=Memstats' -p 'Remove_prefix=Mem.' -m '*' \
+           -F math -p 'Operation=sum' \
+                   -p 'Field=Mem.used' \
+                   -p 'Field=Mem.total' \
+                   -p 'Output_field=wtv' \
+                   -m '*' \
            -o stdout
