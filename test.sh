@@ -6,12 +6,8 @@ cd $(dirname $0)
 
 docker run --rm \
            -v $(pwd):/myplugin fopina/fluent-bit-plugin-dev \
-           cmake -DFLB_SOURCE=/usr/src/fluentbit/fluent-bit-1.4.2/ \
-                 -DPLUGIN_NAME=filter_math ../
-
-docker run --rm \
-           -v $(pwd):/myplugin fopina/fluent-bit-plugin-dev \
-           make
+           sh -c "cmake -DFLB_SOURCE=/usr/src/fluentbit/fluent-bit-1.4.2/ \
+                 -DPLUGIN_NAME=filter_math ../ && make"
 
 docker run --rm \
            -v $(pwd)/build:/myplugin fluent/fluent-bit:1.4.2 \
