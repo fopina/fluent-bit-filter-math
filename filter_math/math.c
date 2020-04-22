@@ -46,6 +46,7 @@ static int configure(struct filter_math_ctx *ctx,
     ctx->output_field = NULL;
     ctx->output_field_len = 0;
     ctx->operation = -1;
+    ctx->cast_to_int = false;
 
     mk_list_foreach(head, &f_ins->properties) {        
         kv = mk_list_entry(head, struct flb_kv, _head);
@@ -63,6 +64,9 @@ static int configure(struct filter_math_ctx *ctx,
                               kv->val);
                 return -1;
             }
+        }
+        else if (strcasecmp(kv->key, "cast_to_int") == 0) {
+            ctx->cast_to_int = flb_utils_bool(kv->val);
         }
         else if (strcasecmp(kv->key, "output_field") == 0) {
             ctx->output_field = flb_strndup(kv->val, flb_sds_len(kv->val));
@@ -251,7 +255,11 @@ static inline int apply_operation(msgpack_packer *packer,
     helper_pack_string(packer, ctx->output_field, ctx->output_field_len);
 
     /* Pack the output value */
-    msgpack_pack_double(packer, output);
+    if (ctx->cast_to_int) {
+        msgpack_pack_int(packer, output);
+    } else {
+        msgpack_pack_double(packer, output);
+    }
 
     return 1;
 }

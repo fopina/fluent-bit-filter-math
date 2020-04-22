@@ -19,6 +19,7 @@ docker run --rm \
                    -p 'Field=Mem.used' \
                    -p 'Field=Mem.total' \
                    -p 'Output_field=wtv' \
+                   -p 'cast_to_int=true' \
                    -m 'sum' \
            -i mem -t sub \
            -F math -p 'Operation=sub' \

@@ -50,6 +50,7 @@ struct filter_math_ctx
     int output_field_len;
     struct mk_list operands;
     int operands_cnt;
+    bool cast_to_int;
     struct flb_filter_instance *ins;
 };
 
