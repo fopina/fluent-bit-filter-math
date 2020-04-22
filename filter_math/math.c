@@ -318,11 +318,11 @@ static int cb_math_filter(const void *data, size_t bytes,
                 modified_records =
                     apply_operation(&packer, &result.data, ctx, &apply_sum);
             }
-            if (ctx->operation == SUB) {
+            else if (ctx->operation == SUB) {
                 modified_records =
                     apply_operation(&packer, &result.data, ctx, &apply_sub);
             }
-            if (ctx->operation == MUL) {
+            else if (ctx->operation == MUL) {
                 modified_records =
                     apply_operation(&packer, &result.data, ctx, &apply_mul);
             }
